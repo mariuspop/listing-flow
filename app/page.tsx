@@ -4,11 +4,15 @@ import { useState } from "react"
 import Link from "next/link"
 import { ImageUpload } from "@/components/ImageUpload"
 import { ListingForm, ListingData } from "@/components/ListingForm"
+import { CategorySelector, Category } from "@/components/CategorySelector"
 import { Button } from "@/components/ui/button"
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null)
   const [step, setStep] = useState<"upload" | "review">("upload")
+  const [category, setCategory] = useState<Category>("frame-tv")
+  const [shopUrl, setShopUrl] = useState("https://renderflow.etsy.com")
+  const [shopName, setShopName] = useState("Render Flow")
   const [isLoading, setIsLoading] = useState(false)
   const [listingData, setListingData] = useState<ListingData | undefined>(undefined)
 
@@ -19,6 +23,9 @@ export default function Home() {
     try {
       const formData = new FormData()
       formData.append("image", selectedFile)
+      formData.append("category", category)
+      formData.append("shopUrl", shopUrl)
+      formData.append("shopName", shopName)
 
       const res = await fetch("/api/analyze", {
         method: "POST",
@@ -58,14 +65,45 @@ export default function Home() {
         </div>
 
         {step === "upload" ? (
-          <div className="max-w-xl mx-auto">
-            <ImageUpload onImageSelected={handleImageSelected} />
+          <div className="max-w-2xl mx-auto space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-500 uppercase tracking-wider">Shop Name</label>
+                <input
+                  type="text"
+                  value={shopName}
+                  onChange={(e) => setShopName(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="My Etsy Shop"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-500 uppercase tracking-wider">Shop URL</label>
+                <input
+                  type="text"
+                  value={shopUrl}
+                  onChange={(e) => setShopUrl(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="https://etsy.com/shop/..."
+                />
+              </div>
+            </div>
+
+            <CategorySelector
+              selected={category}
+              onSelect={setCategory}
+              disabled={isLoading}
+            />
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+              <ImageUpload onImageSelected={handleImageSelected} />
+            </div>
             {isLoading && <p className="text-center mt-4 text-muted-foreground">Analyzing image...</p>}
           </div>
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <ListingForm
               initialData={listingData}
+              initialFiles={file ? [file] : []}
               isLoading={isLoading}
               onCancel={() => {
                 setStep("upload")
@@ -90,26 +128,29 @@ export default function Home() {
                   console.log("Listing created", listing)
 
                   // 2. Upload Image
+                  // Only simple image upload for now, we won't handle the files array yet for the Draft
+                  // listing because that requires another loop. The image analysis one is critical though.
+                  // For the 'Digital Files' section (PDFs etc), we'll need a separate flow later or loop here.
                   if (file) {
                     const formData = new FormData()
                     formData.append("listing_id", listing.listing_id)
                     formData.append("image", file)
 
-                    const imgRes = await fetch("/api/etsy/image", {
+                    const uploadRes = await fetch("/api/etsy/upload", {
                       method: "POST",
                       body: formData
                     })
-                    if (!imgRes.ok) console.warn("Image upload failed")
+
+                    if (!uploadRes.ok) console.warn("Failed to upload image")
                   }
 
-                  alert("Listing created successfully!")
+                  alert("Draft listing created successfully! Check your Etsy Shop Manager.")
                   setStep("upload")
                   setFile(null)
                   setListingData(undefined)
-
-                } catch (e: any) {
-                  console.error(e)
-                  alert(`Error: ${e.message}`)
+                } catch (error) {
+                  console.error(error)
+                  alert(error instanceof Error ? error.message : "Failed to create listing")
                 } finally {
                   setIsLoading(false)
                 }
