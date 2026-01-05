@@ -11,8 +11,9 @@ export default function Home() {
   const [file, setFile] = useState<File | null>(null)
   const [step, setStep] = useState<"upload" | "review">("upload")
   const [category, setCategory] = useState<Category>("frame-tv")
-  const [shopUrl, setShopUrl] = useState("https://renderflow.etsy.com")
-  const [shopName, setShopName] = useState("Render Flow")
+  const [shopUrl, setShopUrl] = useState("[YOUR SHOP URL]")
+  const [shopName, setShopName] = useState("[YOUR SHOP NAME]")
+  const [usedModel, setUsedModel] = useState<string | undefined>(undefined)
   const [isLoading, setIsLoading] = useState(false)
   const [listingData, setListingData] = useState<ListingData | undefined>(undefined)
 
@@ -39,6 +40,7 @@ export default function Home() {
 
       const data = await res.json()
       setListingData(data)
+      setUsedModel(data.usedModel) // Capture active model
       setStep("review")
     } catch (error: any) {
       console.error(error)
@@ -105,10 +107,12 @@ export default function Home() {
               initialData={listingData}
               initialFiles={file ? [file] : []}
               isLoading={isLoading}
+              activeModel={usedModel} // Pass activeModel to ListingForm
               onCancel={() => {
                 setStep("upload")
                 setFile(null)
                 setListingData(undefined)
+                setUsedModel(undefined) // Reset usedModel on cancel
               }}
               onSubmit={async (data) => {
                 setIsLoading(true)
@@ -148,6 +152,7 @@ export default function Home() {
                   setStep("upload")
                   setFile(null)
                   setListingData(undefined)
+                  setUsedModel(undefined) // Reset usedModel after successful submission
                 } catch (error) {
                   console.error(error)
                   alert(error instanceof Error ? error.message : "Failed to create listing")

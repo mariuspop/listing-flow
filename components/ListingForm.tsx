@@ -47,6 +47,7 @@ interface ListingFormProps {
     onSubmit: (data: ListingData) => void
     onCancel: () => void
     isLoading?: boolean
+    activeModel?: string
 }
 
 function formatBytes(bytes: number, decimals = 2) {
@@ -58,7 +59,7 @@ function formatBytes(bytes: number, decimals = 2) {
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]} `
 }
 
-export function ListingForm({ initialData, initialFiles = [], onSubmit, onCancel, isLoading }: ListingFormProps) {
+export function ListingForm({ initialData, initialFiles = [], onSubmit, onCancel, isLoading, activeModel }: ListingFormProps) {
     const defaultValues: ListingData = {
         title: initialData?.title || "",
         description: initialData?.description || "",
@@ -243,8 +244,18 @@ export function ListingForm({ initialData, initialFiles = [], onSubmit, onCancel
         <Card className="w-full">
             <form onSubmit={handleSubmit}>
                 <CardHeader>
-                    <CardTitle>Listing Details</CardTitle>
-                    <CardDescription>Review and edit the AI-generated listing details.</CardDescription>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <CardTitle>Listing Details</CardTitle>
+                            <CardDescription>Review and edit the AI-generated listing details.</CardDescription>
+                        </div>
+                        {activeModel && (
+                            <div className="flex items-center gap-1.5 px-3 py-1 bg-green-50 border border-green-200 rounded-full text-xs font-medium text-green-700">
+                                <Sparkles className="w-3 h-3" />
+                                Model: {activeModel}
+                            </div>
+                        )}
+                    </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     {/* Photos Section */}
