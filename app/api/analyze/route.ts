@@ -90,7 +90,21 @@ export async function POST(req: NextRequest) {
                     ]);
                 } else {
                     let contextPrompt = "";
-                    // ... (rest of context prompt logic for full listing) ...
+                    if (category === "frame-tv") {
+                        contextPrompt = `
+                        This is a digital file for Samsung Frame TV art.
+                        REQUIRED title format: "Title of Art | Frame TV Art | Samsung Frame TV Art | 4K Digital Download" (or similar relevant keywords).
+                        REQUIRED description details:
+                        - Mention it is a "Digital Download"
+                        - Aspect ratio: 16:9
+                        - Resolution: 3840 x 2160 pixels
+                        - Instructions: "After purchase, download the file to your phone (SmartThings App) or USB drive to upload to your TV."
+                        - Shop Info: Check out more at ${shopName} (${shopUrl}).
+                        `;
+                    } else if (category === "wall-art") {
+                        contextPrompt = "This is printable wall art. Suggest standard aspect ratios (2:3, 3:4, 4:5, etc) and mention it is a high-resolution digital download.";
+                    }
+
                     const prompt = `
                       Analyze this product image and generate a high-quality Etsy listing.
                       Category context: ${contextPrompt}
