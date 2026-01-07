@@ -94,12 +94,37 @@ export async function POST(req: NextRequest) {
                         contextPrompt = `
                         This is a digital file for Samsung Frame TV art.
                         REQUIRED title format: "Title of Art | Frame TV Art | Samsung Frame TV Art | 4K Digital Download" (or similar relevant keywords).
-                        REQUIRED description details:
-                        - Mention it is a "Digital Download"
-                        - Aspect ratio: 16:9
-                        - Resolution: 3840 x 2160 pixels
-                        - Instructions: "After purchase, download the file to your phone (SmartThings App) or USB drive to upload to your TV."
-                        - Shop Info: Check out more at ${shopName} (${shopUrl}).
+                        
+                        REQUIRED DESCRIPTION CONTENT:
+                        - THIS IS A SAMSUNG FRAME TV ART PIECE.
+                        - CRITICAL: The title MUST include 'Frame TV' or 'Samsung Frame TV' and '(Digital Download)'.
+                        
+                        - DESCRIPTION TEMPLATE (Use double newlines between sections):
+                        [GENERATE A 2-3 SENTENCE VIVID DESCRIPTION OF THE IMAGE HERE]
+
+                        𝗙𝗶𝗹𝗲 𝗗𝗲𝘁𝗮𝗶𝗹𝘀
+                        Your download includes one high-resolution JPG file sized 3840 x 2160 pixels.
+                        This 16:9 ratio file is specifically optimized for the Samsung Frame TV but works on any 4K 16:9 display.
+                        Please kindly note this file is intended for digital screen use only and is not suitable for printing.
+
+                        𝗛𝗼𝘄 𝘁𝗼 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱
+                        After purchase, you can access your file by visiting your Etsy Profile > Purchases and Reviews.
+                        Please note: The Etsy app does not currently support downloading files. You must sign in to Etsy through a mobile browser (like Safari or Chrome) or a computer to save your file.
+
+                        𝗛𝗼𝘄 𝘁𝗼 𝗔𝗱𝗱 𝘁𝗼 𝗧𝗩
+                        1. Download the image to your phone.
+                        2. Open the free SmartThings app and ensure your TV is connected.
+                        3. Select "Art Mode" and add your photo.
+                        4. Select "No Mat" for the full-screen look.
+
+                        𝗡𝗲𝗲𝗱 𝗛𝗲𝗹𝗽?
+                        We would be happy to assist you. If you have any questions, please message us in Etsy chat.
+                        Thanks for visiting! Make sure to follow the shop to see new items.
+                        Shop: ${shopUrl}
+
+                        © ${shopName}
+
+                        This product is for personal use only. You may not redistribute, resell, or modify the product for commercial gain. Sharing of the file is strictly prohibited. Artwork created with digital tools and AI assistance.
                         `;
                     } else if (category === "wall-art") {
                         contextPrompt = "This is printable wall art. Suggest standard aspect ratios (2:3, 3:4, 4:5, etc) and mention it is a high-resolution digital download.";

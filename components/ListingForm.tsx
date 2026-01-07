@@ -19,7 +19,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Separator } from "@/components/ui/separator"
-import { FileText, X, CloudDownload, GripVertical, Plus, HelpCircle, Image as ImageIcon, Sparkles, Trash2, RefreshCw } from "lucide-react"
+import { FileText, X, CloudDownload, GripVertical, Plus, HelpCircle, Image as ImageIcon, Sparkles, Trash2, RefreshCw, Copy, Check } from "lucide-react"
 
 export interface Photo {
     id: string
@@ -41,6 +41,34 @@ export interface ListingData {
     photos: Photo[]
 }
 
+interface CopyButtonProps {
+    text: string
+    className?: string
+}
+
+function CopyButton({ text, className }: CopyButtonProps) {
+    const [copied, setCopied] = useState(false)
+
+    const handleCopy = async () => {
+        await navigator.clipboard.writeText(text)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+    }
+
+    return (
+        <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className={className}
+            onClick={handleCopy}
+            title="Copy to clipboard"
+        >
+            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-slate-500" />}
+        </Button>
+    )
+}
+
 interface ListingFormProps {
     initialData?: Partial<ListingData>
     initialFiles?: File[]
@@ -48,6 +76,7 @@ interface ListingFormProps {
     onCancel: () => void
     isLoading?: boolean
     activeModel?: string
+    onRegenerate?: () => void
 }
 
 function formatBytes(bytes: number, decimals = 2) {
@@ -59,7 +88,7 @@ function formatBytes(bytes: number, decimals = 2) {
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]} `
 }
 
-export function ListingForm({ initialData, initialFiles = [], onSubmit, onCancel, isLoading, activeModel }: ListingFormProps) {
+export function ListingForm({ initialData, initialFiles = [], onSubmit, onCancel, isLoading, activeModel, onRegenerate }: ListingFormProps) {
     const defaultValues: ListingData = {
         title: initialData?.title || "",
         description: initialData?.description || "",
@@ -249,16 +278,32 @@ export function ListingForm({ initialData, initialFiles = [], onSubmit, onCancel
                             <CardTitle>Listing Details</CardTitle>
                             <CardDescription>Review and edit the AI-generated listing details.</CardDescription>
                         </div>
-                        {activeModel && (
-                            <div className="flex items-center gap-1.5 px-3 py-1 bg-green-50 border border-green-200 rounded-full text-xs font-medium text-green-700">
-                                <Sparkles className="w-3 h-3" />
-                                Model: {activeModel}
-                            </div>
-                        )}
+                        <div className="flex flex-col items-end gap-2">
+                            {activeModel && (
+                                <div className="flex items-center gap-1.5 px-3 py-1 bg-green-50 border border-green-200 rounded-full text-xs font-medium text-green-700">
+                                    <Sparkles className="w-3 h-3" />
+                                    Model: {activeModel}
+                                </div>
+                            )}
+                            {onRegenerate && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={onRegenerate}
+                                    disabled={isLoading}
+                                    className="h-8 text-xs"
+                                >
+                                    <RefreshCw className={`w-3 h-3 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                                    Regenerate
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     {/* Photos Section */}
+                    {/* ... (Photos section preserved implicitly by lack of edit here, but since I'm replacing a huge chunk, I need to be careful) */}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -432,7 +477,10 @@ export function ListingForm({ initialData, initialFiles = [], onSubmit, onCancel
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="title">Title</Label>
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="title">Title</Label>
+                            <CopyButton text={defaultValues.title} />
+                        </div>
                         <Input
                             id="title"
                             name="title"
@@ -440,10 +488,16 @@ export function ListingForm({ initialData, initialFiles = [], onSubmit, onCancel
                             placeholder="Vintage Handcrafted..."
                             required
                         />
+                        <p className="text-xs text-slate-500 text-right">
+                            {defaultValues.title?.length || 0}/140 characters
+                        </p>
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="description">Description</Label>
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="description">Description</Label>
+                            <CopyButton text={defaultValues.description} />
+                        </div>
                         <Textarea
                             id="description"
                             name="description"
@@ -455,7 +509,10 @@ export function ListingForm({ initialData, initialFiles = [], onSubmit, onCancel
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="tags">Tags (comma separated)</Label>
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="tags">Tags (comma separated)</Label>
+                            <CopyButton text={defaultValues.tags} />
+                        </div>
                         <Input
                             id="tags"
                             name="tags"
